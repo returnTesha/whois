@@ -12,7 +12,8 @@
 
 ## System Architecture
 
-![Architecture Screenshot](https://github.com/user-attachments/assets/6beb8392-c8b0-434c-9eaa-a1283f8b6a0c)
+<img width="1841" height="4495" alt="Mermaid Chart - Create complex, visual diagrams with text -2026-01-11-165712" src="https://github.com/user-attachments/assets/ddfca15c-2a17-48ce-b923-6096c0bb0560" />
+
 
 ---
 
