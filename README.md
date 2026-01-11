@@ -12,7 +12,7 @@
 
 ## System Architecture
 
-<img width="500" height="1100" alt="Mermaid Chart - Create complex, visual diagrams with text -2026-01-11-165712" src="https://github.com/user-attachments/assets/ddfca15c-2a17-48ce-b923-6096c0bb0560" />
+<img width="250" height="600" alt="Mermaid Chart - Create complex, visual diagrams with text -2026-01-11-165712" src="https://github.com/user-attachments/assets/ddfca15c-2a17-48ce-b923-6096c0bb0560" />
 
 
 ---
