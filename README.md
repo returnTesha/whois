@@ -80,7 +80,7 @@ Roadmap & Future Upgrades
 ## Developer
 - **GitHub**: [@returnTesha](https://github.com/returnTesha)
 - **Telegram**: [@returnTesha](https://t.me/returnTesha)
-- **Email**: [returntesha@gmail.com](returntesha@gmail.com)
+- **Email**: [returntesha@gmail.com](mailto:returntesha@gmail.com)
 
 ---
 
