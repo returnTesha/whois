@@ -77,9 +77,10 @@ Roadmap & Future Upgrades
     퍼포먼스 업그레이드를 위하여, frontend - backend는 restful로하지만, backend끼리는 grpc로 구성하려고합니다. 현재는 모든 통신을 Restful로 구성하였습니다.
 ---
 
-## 👨‍💻 Developer
+## Developer
 - **GitHub**: [@returnTesha](https://github.com/returnTesha)
 - **Telegram**: [@returnTesha](https://t.me/returnTesha)
+- **Email**: [returntesha@gmail.com](returntesha@gmail.com)
 
 ---
 
