@@ -1,0 +1,46 @@
+@import "tailwindcss"; /* 주석을 해제하여 Tailwind를 활성화하세요 */
+
+:root {
+  --bg-color: #fdfdfb;
+  --pencil: #333333;
+}
+
+body {
+  background-color: var(--bg-color);
+  background-image: radial-gradient(#e5e5f7 0.5px, transparent 0.5px), radial-gradient(#e5e5f7 0.5px, #fdfdfb 0.5px);
+  background-size: 20px 20px;
+  background-position: 0 0, 10px 10px;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  font-weight: 700; /* 전체적으로 약간 두껍게 설정 */
+  color: var(--pencil);
+}
+
+/* --- 여기서부터 로딩 애니메이션 코드 추가 --- */
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes bounceDot {
+  0%, 100% { transform: translateY(0); opacity: 0.3; }
+  50% { transform: translateY(-10px); opacity: 1; }
+}
+
+/* 뱅글뱅글 도는 클래스 */
+.custom-spinner {
+  animation: spin 1s linear infinite !important;
+}
+
+/* 점 세개 톡톡 튀는 클래스 */
+.dot-animation {
+  display: inline-block;
+  animation: bounceDot 1.5s infinite ease-in-out;
+}
+
+/* 슥슥 그린 느낌의 박스 테두리 (기존 유지) */
+.hand-drawn-border {
+  border: 2px solid #333;
+  border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+  padding: 1rem;
+}

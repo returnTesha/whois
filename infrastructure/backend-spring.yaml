@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spring-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spring
+  template:
+    metadata:
+      labels:
+        app: spring
+    spec:
+      hostNetwork: true
+      containers:
+      - name: spring
+        image: ghcr.io/returntesha/whois/backend-spring:v0.4
+        ports:
+        - containerPort: 5000
+        env:
+        - name: GOOGLE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: spring-ai-secret
+              key: GOOGLE_API_KEY
+        - name: TZ 
+          value: "Asia/Seoul"
+        volumeMounts:
+        - name: debug-images
+          mountPath: /mnt/debug_images
+      volumes:
+      - name: debug-images
+        hostPath:
+          path: /mnt/debug_images
+          type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: spring-service
+spec:
+  selector:
+    app: spring
+  ports:
+  - port: 80
+    targetPort: 5000

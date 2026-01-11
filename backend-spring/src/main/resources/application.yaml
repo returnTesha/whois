@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: ai-gw
+
+  ai:
+    google:
+      genai:
+        api-key: ${GOOGLE_API_KEY:}
+        chat:
+          options:
+            model: models/gemini-2.5-pro
+
+server:
+  port: 5000
+  servlet:
+    context-path: /api/spring/v1
+
+user:
+  dir: /Users/cheloniaMD/workspace/whois/backend/spring/

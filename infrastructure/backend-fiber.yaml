@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fiber-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fiber
+  template:
+    metadata:
+      labels:
+        app: fiber
+    spec:
+      containers:
+      - name: fiber
+        image: ghcr.io/returntesha/whois/backend-fiber:v0.12
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 4000
+        env:
+        - name: ALLOWED_ORIGINS
+          value: "http://localhost:3000,https://whois.valuechain.lol,http://whois.valuechain.lol"
+        - name: SPRING_API_URL
+          value: "http://spring-service"
+        - name: TZ
+          value: "Asia/Seoul"
+        volumeMounts:
+        - name: visit-logs
+          mountPath: /mnt/visit-logs  
+      volumes:
+      - name: visit-logs
+        hostPath:
+          path: /mnt/visit-logs  
+          type: DirectoryOrCreate  
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fiber-service
+spec:
+  selector:
+    app: fiber
+  ports:
+  - port: 80
+    targetPort: 4000 
