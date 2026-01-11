@@ -1,6 +1,3 @@
-<img width="639" height="442" alt="스크린샷 2026-01-12 01 24 36" src="https://github.com/user-attachments/assets/6beb8392-c8b0-434c-9eaa-a1283f8b6a0c" />
-
-
 # ❓ WhoIs - AI Drawing Analyzer
 
 > **"Once the AI validates your curiosity, the gates to my tech stack will swing open."**
