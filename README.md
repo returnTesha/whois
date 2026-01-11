@@ -58,7 +58,7 @@
 
 ---
 
-Roadmap & Future Upgrades
+## Roadmap & Future Upgrades
 
 현재의 아키텍처를 넘어, 더 강력하고 관측 가능한(Observable) 시스템으로 진화시키기 위한 단계별 계획입니다.
 1. **Infrastructure Modernization (Helm)**
