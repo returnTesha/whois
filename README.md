@@ -1,7 +1,7 @@
 # ❓ WhoIs - AI Drawing Analyzer
 
-> **"Once the AI validates your curiosity, the gates to my tech stack will swing open."**
-> 사용자의 호기심(물음표 그림)을 AI가 검증하면, 서비스의 아키텍처와 기술 스택이 공개되는 인터랙티브 웹 애플리케이션입니다.
+> **"Once the AI validates your handwritten '?', the gates to my tech stack will swing open."**
+> 사용자가 그린 "물음표 그림"을 AI가 검증하는 어플리케이션입니다.
 
 ---
 
