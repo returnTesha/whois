@@ -10,7 +10,7 @@
 
 ---
 
-## 🏗 System Architecture
+## System Architecture
 
 ![Architecture Screenshot](https://github.com/user-attachments/assets/6beb8392-c8b0-434c-9eaa-a1283f8b6a0c)
 
@@ -37,7 +37,7 @@
 
 ---
 
-## 🛠 CheckPoint
+## CheckPoint
 
 1. **Spring AI & AI Agent Orchestration**
     Prompt Engineering: 단순한 이미지 분석을 넘어, AI에게 유사도 점수와 한/영 피드백을 JSON 형식으로 응답하도록 유도하는 정교한 프롬프트를 설계했습니다.
@@ -73,6 +73,8 @@ Roadmap & Future Upgrades
 4. **AI Logic Optimization**
     Vector Database Integration: 사용자의 그림 데이터를 벡터화하여 저장함으로써, 단순 분석을 넘어 유사한 그림 패턴을 검색하고 추천하는 기능을 확장할 예정입니다.
 
+5. **Protocol설정**
+    퍼포먼스 업그레이드를 위하여, frontend - backend는 restful로하지만, backend끼리는 grpc로 구성하려고합니다. 현재는 모든 통신을 Restful로 구성하였습니다.
 ---
 
 ## 👨‍💻 Developer
