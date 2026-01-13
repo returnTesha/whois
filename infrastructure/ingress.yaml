@@ -5,13 +5,19 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "50m"
     nginx.ingress.kubernetes.io/service-upstream: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/use-forwarded-headers: "true"
+    nginx.ingress.kubernetes.io/enable-real-ip: "true"
 spec:
   ingressClassName: nginx
+  tls:
+  - hosts:
+    - whois.valuechain.lol
+    secretName: whois-tls-secret
   rules:
   - host: whois.valuechain.lol
     http:
       paths:
-      # Fiber API - rewrite 있음
       - path: /api/go
         pathType: Prefix
         backend:
@@ -19,8 +25,6 @@ spec:
             name: fiber-service
             port:
               number: 80
-      
-      # Spring API - rewrite 있음
       - path: /api/spring
         pathType: Prefix
         backend:
@@ -28,7 +32,6 @@ spec:
             name: spring-service
             port:
               number: 80
-      
       - path: /
         pathType: Prefix
         backend:
