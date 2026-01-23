@@ -1,0 +1,18 @@
+[app]
+env = "${APP_ENV}"
+port = 8080
+
+[spring]
+enabled = true
+base_url = "${SPRING_BASE_URL}"
+timeout_ms = 5000
+
+[polygon]
+enabled = true
+rpc_url = "${POLYGON_RPC_URL}"
+contract_address = "${POLYGON_CONTRACT_ADDRESS}"
+token_contract_address = "${POLYGON_TOKEN_ADDRESS}"
+private_key = "${POLYGON_PRIVATE_KEY}"
+
+[log]
+level = "info"

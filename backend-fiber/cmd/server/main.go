@@ -1,244 +1,131 @@
 package main
 
 import (
-	"encoding/json"
+	"bufio"
 	"fmt"
+	"log/slog"
 	"os"
-	"path/filepath"
-	"sync"
-	"time"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cors" // CORS 미들웨어 추가
-	"github.com/gofiber/fiber/v2/middleware/logger"
-	"github.com/google/uuid"
-	"github.com/returnTesha/whois/domain"
+	"github.com/gofiber/fiber/v2/log"
+	"github.com/returnTesha/whois/config"
 	"github.com/returnTesha/whois/handler"
+	"github.com/returnTesha/whois/internal/provider"
+	"github.com/returnTesha/whois/internal/provider/blockchain"
+	"github.com/returnTesha/whois/internal/provider/spring"
+	"github.com/returnTesha/whois/pkg/logger"
 )
 
-const LOG_DIR = "/mnt/visit-logs"
-
-type Visit struct {
-	Timestamp string `json:"timestamp"`
-	IP        string `json:"ip"`
-	UserAgent string `json:"userAgent"`
-	Referer   string `json:"referer"`
-	Device    string `json:"device"`
-	Browser   string `json:"browser"`
-	OS        string `json:"os"`
-	Path      string `json:"path"`
-	TraceID   string `json:"traceID"`
-}
-
-var fileLock sync.Mutex
-
-func visitTrackerMiddleware(c *fiber.Ctx) error {
-	if c.Path() == "/api/go/v1/analyze" && c.Method() == "POST" {
-		traceID := uuid.New().String()
-
-		c.Locals("traceID", traceID)
-
-		visit := Visit{
-			Timestamp: time.Now().Format(time.RFC3339),
-			IP:        c.Get("X-Forwarded-For", c.IP()),
-			UserAgent: c.Get("User-Agent"),
-			Referer:   c.Get("Referer", "Direct"),
-			Device:    getDeviceType(c.Get("User-Agent")),
-			Browser:   getBrowser(c.Get("User-Agent")),
-			OS:        getOS(c.Get("User-Agent")),
-			Path:      c.Path(),
-			TraceID:   traceID, // ⭐ visit 로그에도 저장
-		}
-
-		// 비동기로 저장
-		go saveVisit(visit)
-	}
-
-	return c.Next()
-}
-
 func main() {
-	os.MkdirAll(LOG_DIR, 0755)
 
-	app := fiber.New()
+	logger := logger.Setup()
+	logger.Info("🚀 Starting Satellite Data Colgolector")
 
-	// 1. 로그 미들웨어 (디버깅용)
-	app.Use(logger.New())
-
-	origins := os.Getenv("ALLOWED_ORIGINS")
-	if origins == "" {
-		origins = "http://localhost:3000,https://whois.valuechain.lol,http://whois.valuechain.lol"
+	if err := setupEnviroment(); err != nil {
+		logger.Info("❌ Environment setup failed: %v\n", err)
+		os.Exit(1)
 	}
 
-	app.Use(cors.New(cors.Config{
-		AllowOrigins:     origins,
-		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
-		AllowMethods:     "GET, POST, OPTIONS, PUT, DELETE",
-		AllowCredentials: true,
-	}))
+	cfg, err := loadConfig()
+	if err != nil {
+		logger.Error("Failed to load config", "error", err)
+		os.Exit(1)
+	}
 
-	app.Use(visitTrackerMiddleware)
+	providers, err := setupProviders(cfg, logger)
+	if err != nil {
+		logger.Error("Failed to setup providers", "error", err)
+		os.Exit(1)
+	}
 
-	// 3. 의존성 주입 (Spring AI는 5000포트 사용)
-	// 서비스 레이어 생성 시 Spring AI 서버의 주소를 5000으로 지정합니다.
-	drawingService := domain.NewDrawingService("http://spring-service/api/spring/v1")
-	drawingHandler := &handler.DrawingHandler{Service: drawingService}
-	// 4. API 엔드포인트
-	api := app.Group("/api/go/v1") // 그룹화하여 관리하면 편리합니다.
-	api.Post("/analyze", drawingHandler.AnalyzeQuestionMark)
+	app := setupServer(cfg, providers, logger)
+	port := fmt.Sprintf(":%d", cfg.App.Port)
 
-	app.Post("/visit", func(c *fiber.Ctx) error {
-		visit := Visit{
-			Timestamp: time.Now().Format(time.RFC3339),
-			IP:        c.Get("X-Forwarded-For", c.IP()),
-			UserAgent: c.Get("User-Agent"),
-			Referer:   c.Get("Referer", "Direct"),
-			Device:    getDeviceType(c.Get("User-Agent")),
-			Browser:   getBrowser(c.Get("User-Agent")),
-			OS:        getOS(c.Get("User-Agent")),
-		}
+	if err := app.Listen(port); err != nil {
+		log.Error("Server crashed", "error", err)
+		os.Exit(1)
+	}
+	logger.Info("✅ Application completed successfully")
 
-		if err := saveVisit(visit); err != nil {
-			return c.Status(500).JSON(fiber.Map{"error": err.Error()})
-		}
-
-		return c.JSON(fiber.Map{"success": true})
-	})
-
-	// 방문 기록 조회 API (날짜별)
-	app.Get("/visits/:date", func(c *fiber.Ctx) error {
-		date := c.Params("date") // 2026-01-11 형식
-		visits, err := getVisits(date)
-		if err != nil {
-			return c.Status(500).JSON(fiber.Map{"error": err.Error()})
-		}
-		return c.JSON(visits)
-	})
-
-	// 전체 날짜 목록
-	app.Get("/visits/dates", func(c *fiber.Ctx) error {
-		dates, err := getAvailableDates()
-		if err != nil {
-			return c.Status(500).JSON(fiber.Map{"error": err.Error()})
-		}
-		return c.JSON(dates)
-	})
-
-	// 5. Fiber 서버 실행 (4000포트)
-	app.Listen(":4000")
 }
 
-func saveVisit(visit Visit) error {
-	fileLock.Lock()
-	defer fileLock.Unlock()
+func setupEnviroment() error {
+	return loadEnv(".env")
+}
 
-	today := time.Now().Format("2006-01-02")
-	filename := filepath.Join(LOG_DIR, fmt.Sprintf("visits-%s.json", today))
-
-	var visits []Visit
-	data, err := os.ReadFile(filename)
-	if err == nil {
-		json.Unmarshal(data, &visits)
-	}
-
-	visits = append(visits, visit)
-
-	jsonData, err := json.MarshalIndent(visits, "", "  ")
+func loadEnv(filename string) error {
+	file, err := os.Open(filename)
 	if err != nil {
 		return err
 	}
+	defer file.Close()
 
-	return os.WriteFile(filename, jsonData, 0644)
-}
-
-func getVisits(date string) ([]Visit, error) {
-	filename := filepath.Join(LOG_DIR, fmt.Sprintf("visits-%s.json", date))
-
-	data, err := os.ReadFile(filename)
-	if err != nil {
-		return []Visit{}, nil // 파일 없으면 빈 배열
-	}
-
-	var visits []Visit
-	if err := json.Unmarshal(data, &visits); err != nil {
-		return nil, err
-	}
-
-	return visits, nil
-}
-
-func getAvailableDates() ([]string, error) {
-	files, err := filepath.Glob(filepath.Join(LOG_DIR, "visits-*.json"))
-	if err != nil {
-		return nil, err
-	}
-
-	var dates []string
-	for _, file := range files {
-		base := filepath.Base(file)
-		// visits-2026-01-11.json -> 2026-01-11
-		date := base[7 : len(base)-5]
-		dates = append(dates, date)
-	}
-
-	return dates, nil
-}
-
-func getDeviceType(ua string) string {
-	// 간단한 파싱 (필요시 라이브러리 사용)
-	if contains(ua, "Mobile") {
-		return "Mobile"
-	}
-	if contains(ua, "Tablet") || contains(ua, "iPad") {
-		return "Tablet"
-	}
-	return "Desktop"
-}
-
-func getBrowser(ua string) string {
-	if contains(ua, "Chrome") {
-		return "Chrome"
-	}
-	if contains(ua, "Safari") {
-		return "Safari"
-	}
-	if contains(ua, "Firefox") {
-		return "Firefox"
-	}
-	return "Unknown"
-}
-
-func getOS(ua string) string {
-	if contains(ua, "Windows") {
-		return "Windows"
-	}
-	if contains(ua, "Mac") {
-		return "MacOS"
-	}
-	if contains(ua, "Linux") {
-		return "Linux"
-	}
-	if contains(ua, "Android") {
-		return "Android"
-	}
-	if contains(ua, "iPhone") || contains(ua, "iOS") {
-		return "iOS"
-	}
-	return "Unknown"
-}
-
-func contains(s, substr string) bool {
-	return len(s) > 0 && len(substr) > 0 &&
-		(s == substr || len(s) >= len(substr) &&
-			(s[:len(substr)] == substr || s[len(s)-len(substr):] == substr ||
-				findSubstring(s, substr)))
-}
-
-func findSubstring(s, substr string) bool {
-	for i := 0; i <= len(s)-len(substr); i++ {
-		if s[i:i+len(substr)] == substr {
-			return true
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		trimSpace := strings.TrimSpace(scanner.Text())
+		if trimSpace == "" || strings.HasPrefix(trimSpace, "#") {
+			continue
 		}
+
+		n := strings.SplitN(trimSpace, "=", 2)
+		if len(n) == 2 {
+			key := strings.TrimSpace(n[0])
+			value := strings.TrimSpace(n[1])
+			// Remove quotes if present
+			if strings.HasPrefix(value, "\"") && strings.HasSuffix(value, "\"") {
+				value = value[1 : len(value)-1]
+			}
+			os.Setenv(key, value)
+		}
+
 	}
-	return false
+	return scanner.Err()
+}
+
+func loadConfig() (*config.Config, error) {
+	cfg, err := config.Load("config/config.toml")
+	if err != nil {
+		return nil, fmt.Errorf("load config: %w", err)
+	}
+
+	return cfg, nil
+}
+
+func setupProviders(cfg *config.Config, logger *slog.Logger) (map[string]provider.Provider, error) {
+	registry := provider.NewRegistry()
+
+	if cfg.Spring.Enabled {
+		springProvider := spring.NewProvider(cfg.Spring, logger)
+		registry.Register(springProvider)
+	}
+
+	if cfg.Polygon.Enabled {
+		polygonProvider := blockchain.NewPolygonProvider(cfg.Polygon, logger)
+		registry.Register(polygonProvider)
+	}
+
+	providers := registry.GetProviders()
+
+	if len(providers) == 0 {
+		return nil, fmt.Errorf("no providers enabled")
+	}
+
+	logger.Info("Providers initialized", "count", len(providers))
+	return providers, nil
+}
+
+func setupServer(cfg *config.Config, providers map[string]provider.Provider, logger *slog.Logger) *fiber.App {
+	app := fiber.New(fiber.Config{
+		AppName: "QuestionMark v1",
+	})
+
+	drawingHandler := handler.DrawingHandler{
+		SpringProvder: providers["spring-ai"],
+	}
+
+	api := app.Group("/api/go/v1")
+	api.Post("/analyze", drawingHandler.AnalyzeQuestionMark)
+
+	return app
 }
