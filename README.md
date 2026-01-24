@@ -2,7 +2,8 @@
 
 > **"Once the AI validates your handwritten '?', the gates to my tech stack will swing open."**
 > 사용자가 그린 "물음표 그림"을 AI가 검증하는 어플리케이션입니다.
-
+> WhoIs 프로젝트의 가치를 한 단계 더 높여줄 'Web3 보상 메커니즘' 내용을 추가했습니다. 단순히 그림을 분석하는 것에 그치지 않고, AI의 검증 결과가 블록체인 상의 실제 트랜잭션으로 이어지는 'Proof of Talent' 과정을 인프라 및 기술 스택 섹션에 녹여냈습니다.
+> 
 ---
 
 ## 🌐 Live Demo
@@ -37,6 +38,25 @@
 - **AI**: Google Gemini AI
 
 ---
+🏗️ Updated System Architecture (Web3 Integration)
+
+기존 아키텍처에 Polygon (Sepolia Testnet) 연동 레이어를 추가하여, AI 검증 결과가 임계치(95%)를 넘을 경우 실시간으로 보상이 지급되는 구조를 완성했습니다.
+Added Infrastructure Detail
+
+    Blockchain Network: Polygon Sepolia Testnet
+
+    Node Provider: Infura (Dedicated RPC Gateway)
+
+    Smart Contract: ERC-20 Standard (Token Symbol: VC)
+
+    Library: go-ethereum (ethclient)
+
+🏆 Key Features (New!)
+
+    Real-time Web3 Reward: AI 분석 유사도가 95% 이상일 경우, 스마트 컨트랙트를 통해 사용자에게 VC(Value Chain) 토큰을 자동 발행/전송.
+
+    On-chain Verification: 모든 분석 결과와 전송 기록은 블록체인 트랜잭션(TxId)으로 기록되어 데이터의 무결성을 보장.
+
 
 ## CheckPoint
 
