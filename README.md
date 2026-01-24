@@ -13,8 +13,9 @@
 
 ## System Architecture
 
-<img width="250" height="600" alt="Mermaid Chart - Create complex, visual diagrams with text -2026-01-11-165712" src="https://github.com/user-attachments/assets/ddfca15c-2a17-48ce-b923-6096c0bb0560" />
 
+
+<img width="672" height="1536" alt="whois-architecture" src="https://github.com/user-attachments/assets/249299fe-207f-46a9-a483-a0779d3f530b" />
 
 ---
 
