@@ -1,5 +1,7 @@
+"use client";
+
 import React from 'react';
-import { X, Server, Cloud, Cpu, ArrowRight, ArrowDown } from 'lucide-react';
+import { X, Server, Cloud, Cpu, ArrowRight, ArrowDown, Database, Link as LinkIcon, Gift } from 'lucide-react';
 
 const ArchitectureModal = ({ onClose }: { onClose: () => void }) => {
     return (
@@ -10,7 +12,7 @@ const ArchitectureModal = ({ onClose }: { onClose: () => void }) => {
                 <div className="flex justify-between items-center mb-8 border-b-4 border-black pb-4">
                     <div className="flex items-center gap-2">
                         <Cloud className="text-blue-500" />
-                        <h2 className="text-2xl font-black uppercase tracking-tighter">System Infrastructure</h2>
+                        <h2 className="text-2xl font-black uppercase tracking-tighter">Tech Stack & Reward Flow</h2>
                     </div>
                     <button
                         onClick={onClose}
@@ -21,88 +23,98 @@ const ArchitectureModal = ({ onClose }: { onClose: () => void }) => {
                 </div>
 
                 {/* 메인 아키텍처 바디 */}
-                <div className="relative space-y-6">
+                <div className="relative space-y-4">
 
-                    {/* GCP & GCE 레이어 */}
-                    <div className="border-4 border-dashed border-gray-300 rounded-[24px] p-6 relative bg-gray-50/50">
+                    {/* GCP & K3s 레이어 */}
+                    <div className="border-4 border-dashed border-gray-300 rounded-[24px] p-5 relative bg-gray-50/50">
                         <div className="absolute -top-3 left-6 bg-white px-3 py-0.5 border-2 border-gray-300 rounded-full font-black text-gray-400 text-[10px] uppercase tracking-widest">
-                            Google Cloud Platform (GCE Instance)
+                            Cloud: Google Cloud Platform (GCE)
                         </div>
 
                         {/* K3s 클러스터 영역 */}
-                        <div className="border-4 border-black rounded-[20px] p-6 bg-white relative shadow-[4px_4px_0px_0px_rgba(0,0,0,0.05)]">
+                        <div className="border-4 border-black rounded-[20px] p-5 bg-white relative shadow-[4px_4px_0px_0px_rgba(0,0,0,0.05)]">
                             <div className="absolute -top-3 left-4 bg-yellow-400 border-2 border-black text-black px-2 py-0.5 text-[10px] font-black rounded uppercase">
-                                K3s Lightweight Kubernetes
+                                Orchestration: K3s
                             </div>
 
                             {/* 서비스 흐름도 */}
-                            <div className="flex flex-col gap-6">
-
-                                {/* 상단: 프론트 & 게이트웨이 */}
+                            <div className="flex flex-col gap-4">
+                                {/* Next.js & Go Fiber */}
                                 <div className="grid grid-cols-7 items-center">
-                                    {/* Next.js */}
                                     <div className="col-span-3 bg-blue-50 border-2 border-black p-3 rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-center">
-                                        <div className="text-[9px] font-black text-blue-600 uppercase mb-1">Frontend Pod</div>
-                                        <div className="font-black text-sm">Next.js</div>
-                                        <div className="text-[10px] font-bold text-gray-500 mt-1 flex items-center justify-center gap-1">
-                                            <Server size={10} /> Nginx Proxy
-                                        </div>
+                                        <div className="text-[9px] font-black text-blue-600 uppercase">Frontend</div>
+                                        <div className="font-black text-xs">Next.js</div>
                                     </div>
-
-                                    {/* 연결 화살표 */}
-                                    <div className="col-span-1 flex justify-center text-black">
-                                        <ArrowRight size={20} strokeWidth={3} />
-                                    </div>
-
-                                    {/* Go Fiber */}
+                                    <div className="col-span-1 flex justify-center"><ArrowRight size={16} /></div>
                                     <div className="col-span-3 bg-orange-50 border-2 border-black p-3 rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-center">
-                                        <div className="text-[9px] font-black text-orange-600 uppercase mb-1">Gateway Pod</div>
-                                        <div className="font-black text-sm">Go Fiber</div>
-                                        <div className="text-[10px] font-bold text-gray-500 mt-1 flex items-center justify-center gap-1">
-                                            <Cpu size={10} /> API Handler
-                                        </div>
+                                        <div className="text-[9px] font-black text-orange-600 uppercase">Gateway</div>
+                                        <div className="font-black text-xs">Go Fiber</div>
                                     </div>
                                 </div>
 
-                                {/* 수직 화살표 */}
-                                <div className="flex justify-center -my-2">
-                                    <ArrowDown size={20} className="text-black" strokeWidth={3} />
-                                </div>
+                                <div className="flex justify-center -my-1"><ArrowDown size={16} /></div>
 
-                                {/* 하단: Spring Boot */}
-                                <div className="flex justify-center">
-                                    <div className="w-4/5 bg-green-50 border-2 border-black p-4 rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-center relative overflow-hidden">
-                                        <div className="text-[9px] font-black text-green-600 uppercase mb-1">AI Logic Pod</div>
-                                        <div className="font-black text-md">Spring Boot Framework</div>
-                                        <div className="text-[10px] font-bold text-gray-500 mt-1">
-                                            Embedded Apache Tomcat 10
-                                        </div>
-                                        {/* 장식용 배경 아이콘 */}
-                                        <div className="absolute -right-2 -bottom-2 opacity-10">
-                                            <Server size={60} />
-                                        </div>
-                                    </div>
+                                {/* Spring Boot */}
+                                <div className="bg-green-50 border-2 border-black p-3 rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-center">
+                                    <div className="text-[9px] font-black text-green-600 uppercase">Analysis Engine</div>
+                                    <div className="font-black text-sm">Spring Boot (AI Logic)</div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* 외부 연동: Gemini AI */}
-                    <div className="flex justify-center items-center gap-3 pt-2">
-                        <div className="h-[2px] flex-1 bg-dashed border-t-2 border-gray-300 border-dashed"></div>
-                        <div className="bg-gradient-to-r from-purple-600 to-blue-600 border-2 border-black px-6 py-2 rounded-2xl font-black text-white text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center gap-2">
-                            <div className="w-2 h-2 bg-white rounded-full animate-ping"></div>
-                            GOOGLE GEMINI AI API (LLM)
+                    {/* 수직 연결 화살표 (Blockchain 전송 흐름) */}
+                    <div className="flex justify-center py-1">
+                        <div className="flex flex-col items-center">
+                            <div className="text-[10px] font-black text-blue-600 uppercase mb-1">If Score ≥ 95%</div>
+                            <ArrowDown size={20} className="text-blue-600 animate-bounce" strokeWidth={3} />
                         </div>
-                        <div className="h-[2px] flex-1 bg-dashed border-t-2 border-gray-300 border-dashed"></div>
+                    </div>
+
+                    {/* 블록체인 레이어 (Ethereum) */}
+                    <div className="grid grid-cols-2 gap-4">
+                        {/* Infura / RPC */}
+                        <div className="border-2 border-black p-3 rounded-2xl bg-slate-100 flex items-center justify-center gap-2">
+                            <Database size={16} className="text-orange-500" />
+                            <div className="text-center">
+                                <div className="text-[8px] font-black text-gray-500 uppercase">Node Provider</div>
+                                <div className="text-[11px] font-black italic">Infura (RPC)</div>
+                            </div>
+                        </div>
+
+                        {/* Ethereum Sepolia */}
+                        <div className="border-2 border-black p-3 rounded-2xl bg-indigo-600 text-white flex items-center justify-center gap-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                            <LinkIcon size={16} />
+                            <div className="text-center">
+                                <div className="text-[8px] font-black text-indigo-200 uppercase">Network</div>
+                                <div className="text-[11px] font-black">Ethereum Sepolia</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* 최종 보상: VC Token */}
+                    <div className="bg-gradient-to-r from-yellow-100 to-yellow-200 border-4 border-black p-4 rounded-[24px] flex items-center justify-between shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+                        <div className="flex items-center gap-3">
+                            <div className="bg-yellow-400 p-2 border-2 border-black rounded-lg">
+                                <Gift size={20} className="text-black" />
+                            </div>
+                            <div>
+                                <div className="text-[10px] font-black text-yellow-700 uppercase">Reward Asset</div>
+                                <div className="text-lg font-black tracking-tighter">ValueChain (VC) Token</div>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <div className="text-[10px] font-black text-gray-500 uppercase">Amount</div>
+                            <div className="text-sm font-black text-blue-600">1 ~ 1,000 Random</div>
+                        </div>
                     </div>
                 </div>
 
                 {/* 푸터 설명 */}
-                <div className="mt-8 text-center">
-                    <p className="text-[11px] font-bold text-gray-500 leading-relaxed max-w-sm mx-auto">
-                        "The gates to my tech stack have swung open."<br/>
-                        Everything is containerized and orchestrated by K3s on GCP.
+                <div className="mt-6 text-center border-t-2 border-gray-100 pt-4">
+                    <p className="text-[10px] font-bold text-gray-400 leading-tight">
+                        "Your creativity is rewarded on-chain."<br/>
+                        Analyzed by Gemini Pro, Orchestrated by K3s, Rewarded on Ethereum.
                     </p>
                 </div>
             </div>

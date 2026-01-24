@@ -1,13 +1,15 @@
 "use client";
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { Loader2, Send, RotateCcw, Github } from 'lucide-react';
+// Gift, ExternalLink 아이콘을 추가했습니다.
+import { Loader2, Send, RotateCcw, Github, Gift, ExternalLink } from 'lucide-react';
 import ArchitectureModal from "@/components/ArchitectureModal";
 
 interface AnalysisResult {
     similarity: number;
     feedback: string;
     feedback_ko: string;
+    tx_id: string;
 }
 
 export default function DrawingCanvas() {
@@ -106,77 +108,49 @@ export default function DrawingCanvas() {
 
     const exportImage = async () => {
         const canvas = canvasRef.current;
-        if (!canvas) {
-            console.error("Canvas ref is null");
-            return;
-        }
+        if (!canvas) return;
 
         setStatus('loading');
 
         try {
-            // 1. 임시 캔버스 생성 및 크기 설정
-            // 원본 캔버스의 '실제 내부 해상도(width/height)'를 그대로 가져와야 합니다.
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = canvas.width;
             tempCanvas.height = canvas.height;
             const tempCtx = tempCanvas.getContext('2d');
+            if (!tempCtx) throw new Error("Context error");
 
-            if (!tempCtx) {
-                throw new Error("Could not get context from temp canvas");
-            }
-
-            // 2. 배경을 먼저 흰색으로 채우기 (투명도 방지)
             tempCtx.fillStyle = '#FFFFFF';
             tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-
-            // 3. 원본 캔버스 내용을 임시 캔버스에 복사
             tempCtx.drawImage(canvas, 0, 0);
 
-            // 4. 데이터 추출 및 길이 확인
             const imageData = tempCanvas.toDataURL('image/png');
 
-            if (imageData.length < 100) { // 너무 짧으면 실패한 것
-                throw new Error("Generated image data is too short or empty");
-            }
-
-            //5. 서버 전송 (서버의 @RequestBody Map 키값이 'image'인지 확인!)
-            const response = await fetch('/api/go/v1/analyze', {
+            const response = await fetch('http://localhost:4000/api/go/v1/analyze', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({ image_data: imageData }),
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: imageData }),
             });
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`Server error: ${response.status} - ${errorText}`);
-            }
-
             const data = await response.json();
-
             setResult(data);
             setStatus('result');
-
         } catch (error) {
-            console.error("Analysis process failed:", error);
+            console.error(error);
             setStatus('idle');
-            alert("분석에 실패했습니다. 이미지가 정상적으로 생성되지 않았습니다.");
+            alert("Analysis failed.");
         }
     };
 
     return (
         <div className="flex flex-col items-center w-full max-w-xl mx-auto p-4 select-none min-h-screen justify-center">
-            {/* 헤더 섹션: 중복 제거 및 깔끔하게 정리 */}
-            {/*<div className="text-center mb-8">*/}
-                {/*<h1 className="text-3xl font-black text-gray-900 tracking-tighter uppercase mb-2">Draw a question mark</h1>*/}
-                {/*<p className="text-base font-bold text-gray-500">*/}
-                {/*    Draw a <span className="text-blue-600 underline">?</span> to enter my world*/}
-                {/*</p>*/}
-            {/*</div>*/}
+            {/* 상단 안내 문구 (영문) */}
+            <div className="text-center mb-6">
+                <h1 className="text-3xl font-black text-gray-900 tracking-tighter uppercase mb-1">Draw a question mark</h1>
+                <p className="text-sm font-bold text-gray-500">
+                    Score <span className="text-blue-600">95% or higher</span> to earn <span className="text-blue-600 font-extrabold">ValueChain (VC) Tokens</span>! 🎁
+                </p>
+            </div>
 
-            {/* 메인 영역 */}
             <div className="w-full flex flex-col items-center">
                 {status === 'idle' && (
                     <>
@@ -207,78 +181,59 @@ export default function DrawingCanvas() {
                     </>
                 )}
 
-                {/* 로딩 화면 */}
                 {status === 'loading' && (
                     <div className="flex flex-col items-center justify-center bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] rounded-[20px]"
                          style={{ width: canvasSize, height: canvasSize }}>
-
-                        {/* 뱅글뱅글 돌아가는 로더 */}
                         <div className="relative mb-8">
                             <div className="w-20 h-20 border-[10px] border-gray-100 rounded-full"></div>
                             <div className="absolute top-0 left-0 w-20 h-20 border-[10px] border-blue-600 border-t-transparent rounded-full custom-spinner"></div>
                         </div>
-
-                        <div className="flex flex-col items-center">
-                            <p className="font-black text-3xl text-gray-900 flex items-center tracking-tight">
-                                ANALYZING
-                                <span className="flex ml-2 space-x-1">
-                    <span className="dot-animation" style={{ animationDelay: '0s' }}>.</span>
-                    <span className="dot-animation" style={{ animationDelay: '0.2s' }}>.</span>
-                    <span className="dot-animation" style={{ animationDelay: '0.4s' }}>.</span>
-                </span>
-                            </p>
-                            {/* 요청하신 파란색 문구 */}
-                            <p className="text-sm font-bold text-blue-600 mt-2 uppercase tracking-[0.2em] animate-pulse">
-                                Please wait a 10s
-                            </p>
-                        </div>
+                        <p className="font-black text-3xl text-gray-900 tracking-tight">ANALYZING...</p>
+                        <p className="text-sm font-bold text-blue-600 mt-2 uppercase animate-pulse">Please wait a 30s</p>
                     </div>
                 )}
 
-                {/* 결과 화면 */}
                 {status === 'result' && result && (
                     <div className="w-full flex flex-col items-center animate-in zoom-in duration-300 max-w-[400px]">
                         <div className="border-4 border-black p-8 bg-white text-center w-full shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] rounded-[20px] mb-6">
-                            <div className="text-8xl font-black text-red-500 mb-4">
-                                {result.similarity}%
-                            </div>
+                            <div className="text-8xl font-black text-red-500 mb-4">{result.similarity}%</div>
 
-                            {/* 해설 텍스트 및 언어 전환 */}
-                            <div className="relative p-4 bg-green-50 border-4 border-green-500 rounded-xl font-bold text-green-700 italic text-lg shadow-[4px_4px_0px_0px_rgba(0,150,0,0.1)]">
+                            <div className="relative p-4 bg-green-50 border-4 border-green-500 rounded-xl font-bold italic mb-6">
                                 "{showKo ? result.feedback_ko : result.feedback}"
-
-                                <button
-                                    onClick={() => setShowKo(!showKo)}
-                                    className="mt-3 block mx-auto text-xs bg-green-500 text-white px-2 py-1 rounded-md not-italic hover:bg-green-600 transition-colors"
-                                >
-                                    {showKo ? "View English" : "한국어로 보기"}
+                                <button onClick={() => setShowKo(!showKo)} className="mt-3 block mx-auto text-xs bg-green-500 text-white px-2 py-1 rounded-md not-italic">
+                                    {showKo ? "English" : "한국어"}
                                 </button>
                             </div>
+                            {/* [수정] 95% 이상이고 해시가 있을 때만 보상 박스를 보여줍니다. */}
+                            {result.similarity >= 95 && result.tx_id && (
+                                <div className="mt-6 p-4 bg-blue-50 border-4 border-blue-600 rounded-xl text-left animate-pulse">
+                                    <div className="flex items-center gap-2 mb-2 font-black text-blue-900 uppercase">
+                                        <Gift className="text-blue-600" size={20} /> Reward Dispatched!
+                                    </div>
+                                    <a
+                                        href={`https://sepolia.etherscan.io/tx/${result.tx_id}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center justify-between gap-3 w-full p-3 bg-white border-2 border-blue-600 text-blue-600 rounded-lg font-bold text-[10px] hover:bg-blue-50 transition-all group"
+                                    >
+                                        <span className="truncate uppercase">VIEW TX: {result.tx_id}</span>
+                                        <ExternalLink size={14} className="shrink-0" />
+                                    </a>
+                                </div>
+                            )}
                         </div>
-                        {/* 깃허브 버튼 (추가) */}
-                        <a
-                            href="https://github.com/returnTesha/whois"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center justify-center gap-2 w-full p-4 bg-gray-900 text-white rounded-xl font-bold border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 transition-all hover:bg-black"
-                        >
-                            <Github size={20} /> View Source Code on GitHub
-                        </a>
 
-                        {/* 아키텍처 보기 버튼 (텔레그램 버튼 위) */}
-                        <button
-                            onClick={() => setShowArch(true)}
-                            className="w-full mb-4 py-3 bg-purple-500 text-white border-2 border-black rounded-xl font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 transition-all"
-                        >
-                            🔍 View Infrastructure Architecture
-                        </button>
-
-                        {/* 하단 버튼 섹션 */}
                         <div className="w-full space-y-4">
+                            <a href="https://github.com/returnTesha/whois" target="_blank" className="flex items-center justify-center gap-2 w-full p-4 bg-gray-900 text-white rounded-xl font-bold border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 transition-all">
+                                <Github size={20}/> GitHub
+                            </a>
+                            <button onClick={() => setShowArch(true)} className="w-full py-3 bg-purple-500 text-white border-2 border-black rounded-xl font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 transition-all">
+                                🔍 Infrastructure Architecture
+                            </button>
                             <button onClick={() => setStatus('idle')} className="w-full py-4 bg-gray-900 text-white border-2 border-black rounded-xl font-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 transition-all">
                                 Try Again
                             </button>
-                            <a href="https://t.me/returnTesha" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 w-full p-4 bg-sky-400 text-white rounded-xl font-bold border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 transition-all">
+                            <a href="https://t.me/returnTesha" target="_blank" className="flex items-center justify-center gap-2 w-full p-4 bg-sky-400 text-white rounded-xl font-bold border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 transition-all">
                                 <Send size={18} /> Telegram @returnTesha
                             </a>
                         </div>

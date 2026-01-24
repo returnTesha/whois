@@ -4,7 +4,7 @@ import "context"
 
 type Provider interface {
 	GetName() string
-	Excute(ctx context.Context, data interface{}) (interface{}, error)
+	Excute(ctx context.Context, data interface{}, traceID string) (interface{}, error)
 }
 
 type Registry struct {

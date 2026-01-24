@@ -1,6 +1,6 @@
 [app]
 env = "${APP_ENV}"
-port = 8080
+port = 4000
 
 [spring]
 enabled = true

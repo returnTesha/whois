@@ -9,11 +9,14 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/google/uuid"
 	"github.com/returnTesha/whois/config"
 	"github.com/returnTesha/whois/handler"
 	"github.com/returnTesha/whois/internal/provider"
 	"github.com/returnTesha/whois/internal/provider/blockchain"
 	"github.com/returnTesha/whois/internal/provider/spring"
+	"github.com/returnTesha/whois/internal/usecase"
 	"github.com/returnTesha/whois/pkg/logger"
 )
 
@@ -120,9 +123,41 @@ func setupServer(cfg *config.Config, providers map[string]provider.Provider, log
 		AppName: "QuestionMark v1",
 	})
 
-	drawingHandler := handler.DrawingHandler{
-		SpringProvder: providers["spring-ai"],
+	origins := os.Getenv("ALLOWED_ORIGINS")
+	if origins == "" {
+		// 기본값 세팅
+		origins = "http://localhost:3000,https://whois.valuechain.lol,http://whois.valuechain.lol,http://question-mark.valuechain.lol,https://question-mark.valuechain.lol"
 	}
+
+	app.Use(cors.New(cors.Config{
+		AllowOrigins:     origins,
+		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
+		AllowMethods:     "GET, POST, OPTIONS, PUT, DELETE",
+		AllowCredentials: true,
+	}))
+
+	app.Use(func(c *fiber.Ctx) error {
+		traceID := uuid.New().String()
+		c.Locals("traceID", traceID)
+		c.Set("X-Trace-ID", traceID)
+		return c.Next()
+	})
+
+	springProv := providers["spring"]
+	if springProv == nil {
+		logger.Error("❌ [spring] provider not found in registry!")
+		// 여기서 패닉을 내거나 기본 설정을 할 수 있습니다.
+	}
+
+	polygonProv := providers["polygon"]
+
+	drawingUsecase := usecase.NewDrawingUsecase(springProv, polygonProv, logger)
+
+	drawingHandler := handler.DrawingHandler{
+		Usecase: drawingUsecase,
+	}
+
+	logger.Info("Successfully set [spring] drawing handler")
 
 	api := app.Group("/api/go/v1")
 	api.Post("/analyze", drawingHandler.AnalyzeQuestionMark)

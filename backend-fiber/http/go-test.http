@@ -1,0 +1,11 @@
+### GET request to example server
+GET https://examples.http-client.intellij.net/get
+    ?generated-in=GoLand
+
+### GET request spring-ai
+POST http://localhost:8080/api/go/v1/analyze
+Content-Type: application/json
+
+{
+    "image_data" : "abcd"
+}

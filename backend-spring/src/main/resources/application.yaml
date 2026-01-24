@@ -5,7 +5,8 @@ spring:
   ai:
     google:
       genai:
-        api-key: ${GOOGLE_API_KEY:}
+        api-key: AIzaSyCr3E2TkcbXrniswADx11Ho3wEsWiIee8I
+        project-id: projects/252168514844
         chat:
           options:
             model: models/gemini-2.5-pro
