@@ -6,7 +6,7 @@ spring:
     google:
       genai:
         api-key: 
-        project-id: projects/252168514844
+        project-id: 
         chat:
           options:
             model: models/gemini-2.5-pro
