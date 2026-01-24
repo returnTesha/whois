@@ -5,7 +5,7 @@ spring:
   ai:
     google:
       genai:
-        api-key: AIzaSyCr3E2TkcbXrniswADx11Ho3wEsWiIee8I
+        api-key: 
         project-id: projects/252168514844
         chat:
           options:
